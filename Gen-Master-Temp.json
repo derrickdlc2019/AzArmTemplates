@@ -1,0 +1,92 @@
+//This template will contain basic informations needed to run resources on Azure [Resource Group, Vnet, Subnet, IPAddress, Network Interface]
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+
+        "ResourceGroupName" : { 
+            "defaultValue": "GroupTesting",
+            "type" : "string", 
+            "metadata": { 
+                "description": "Resource Group Name"
+            }
+
+        },
+
+        "ResourceGroupLocation" : { 
+            "defaultValue": "East US",
+            "type": "string",
+            "metadata": { 
+                "decription": "Resource Group Location"
+            }   
+        }, 
+
+        "RgVNet": { 
+            "defaultValue": "Vnet",
+            "type": "string",
+            "metadata": { 
+                "decription": "Vnet for Resource Group"
+            }
+        }, 
+
+        "VnetAddressPrefix": { 
+            "type": "string",
+            "defaultValue": "10.0.0.0/24",
+            "metadata": { 
+                "decription": "Vnet Address Prefix"
+            }
+        }, 
+
+        "RgSubNet": { 
+            "type": "string", 
+            "defaultValue": "SubVnet", 
+            "metadata": { 
+                "description": "Resource Group SubNet"
+            }
+        }, 
+
+        "RgSubNetAddressPrefix": { 
+            "type": "string",
+            "defaultValue": "10.0.1.0/16",
+            "metadata": { 
+                "description": "Subnet Address Prefix"
+            }
+        },
+
+        "PubIpDNS": { 
+            "type": "string",
+            "defaultValue": "[concat('gw', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "ResourceGroup Ip Address."
+            }
+        },
+
+        "RgNatGateway": { 
+            "type": "string",
+            "defaultValue": "NatGateWay",
+            "metadata": { 
+                "description": "Nat Gateway for public network access"
+            }
+        },
+
+        "location" : { 
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string", 
+            "metadata": { 
+                "decription": "Location Of The Resource Group"
+            }
+        }
+    
+    },
+    "functions": [],
+    "variables": {
+        "publicIPName": "[concat(parameters('RgNatGateway'), 'ip')]", 
+        "publicIPAddress": [ 
+            {
+                "id": "[resourceId('Microsoft.Network/publicIPAddress', variables('publicIPName'))]"
+            }
+        ]
+    },
+    "resources": [],
+    "outputs": {}
+}
