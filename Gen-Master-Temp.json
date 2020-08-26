@@ -1,4 +1,6 @@
 //This template will contain basic informations needed to run resources on Azure [Resource Group, Vnet, Subnet, IPAddress, Network Interface]
+//FUCK YOU
+
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
@@ -20,14 +22,16 @@
         //         "decription": "Resource Group Location"
         //     }   
 
+        //Virtual Network
         "RgVNet": { 
             "defaultValue": "Vnet",
             "type": "string",
             "metadata": { 
                 "decription": "Vnet for Resource Group"
             }
-        }, 
+        },
 
+        //Virtual Network Address Prefix
         "VnetAddressPrefix": { 
             "type": "string",
             "defaultValue": "10.0.0.0/24",
@@ -35,7 +39,7 @@
                 "decription": "Vnet Address Prefix"
             }
         }, 
-
+        //Subnet
         "RgSubNet": { 
             "type": "string", 
             "defaultValue": "SubVnet", 
@@ -43,7 +47,7 @@
                 "description": "Resource Group SubNet"
             }
         }, 
-
+        //Subnet Address Prefix
         "RgSubNetAddressPrefix": { 
             "type": "string",
             "defaultValue": "10.0.1.0/16",
@@ -51,7 +55,7 @@
                 "description": "Subnet Address Prefix"
             }
         },
-
+        //Setting the DNS of the Resource Group
         "PubIpDNS": { 
             "type": "string",
             "defaultValue": "[concat('gw', uniqueString(resourceGroup().id))]",
@@ -59,7 +63,7 @@
                 "description": "ResourceGroup Ip Address."
             }
         },
-
+        //Gateway facing the public network
         "RgNatGateway": { 
             "type": "string",
             "defaultValue": "NatGateWay",
@@ -67,15 +71,15 @@
                 "description": "Nat Gateway for public network access"
             }
         },
-
+        //Setting the location of the Rg to East US
         "location" : { 
-            "defaultValue": "[resourceGroup().location]",
+            "defaultValue": "EastUS",
             "type": "string", 
             "metadata": { 
                 "decription": "Location Of The Resource Group"
             }
         }
-    
+
     },
     "functions": [],
     "variables": {
@@ -86,10 +90,11 @@
             }
         ]
     },
+
     "resources": [ 
         {
 
-             // "type": "Microsoft.Resource/resourceGroups",
+            // "type": "Microsoft.Resource/resourceGroups",
             // "apiVersion": "2018-05-01",
             // "location": "[parameters('location')]",
             // "name": "[parameters('ResourceGroupName')]",
