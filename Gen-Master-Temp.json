@@ -5,168 +5,135 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        //Creates a new Resource Group
-        "ResourceGroupName" : { 
-            "defaultValue": "GroupTesting",
-            "type" : "string", 
-            "metadata": { 
-                "description": "Resource Group Name"
-            }
 
-        },
-
-        // "ResourceGroupLocation" : { 
-        //     "defaultValue": "East US",
-        //     "type": "string",
-        //     "metadata": { 
-        //         "decription": "Resource Group Location"
-        //     }   
-
-        //Virtual Network
-        "RgVNet": { 
+        "RgVNet": {
             "defaultValue": "Vnet",
             "type": "string",
-            "metadata": { 
+            "metadata": {
                 "decription": "Vnet for Resource Group"
             }
         },
-
-        //Virtual Network Address Prefix
-        "VnetAddressPrefix": { 
+        "VnetAddressPrefix": {
             "type": "string",
             "defaultValue": "10.0.0.0/24",
-            "metadata": { 
+            "metadata": {
                 "decription": "Vnet Address Prefix"
             }
-        }, 
-        //Subnet
-        "RgSubNet": { 
-            "type": "string", 
-            "defaultValue": "SubVnet", 
-            "metadata": { 
+        },
+
+        "RgSubNet": {
+            "type": "string",
+            "defaultValue": "SubVnet",
+            "metadata": {
                 "description": "Resource Group SubNet"
             }
-        }, 
-        //Subnet Address Prefix
-        "RgSubNetAddressPrefix": { 
+        },
+
+        "RgSubNetAddressPrefix": {
             "type": "string",
             "defaultValue": "10.0.1.0/16",
-            "metadata": { 
+            "metadata": {
                 "description": "Subnet Address Prefix"
             }
         },
-        //Setting the DNS of the Resource Group
-        "PubIpDNS": { 
+
+        "RgNatGateway": {
+            "type": "string",
+            "defaultValue": "NatGateWay",
+            "metadata": {
+                "description": "Nat Gateway for public network access"
+            }
+        },
+
+        "PubIpDNS": {
             "type": "string",
             "defaultValue": "[concat('gw', uniqueString(resourceGroup().id))]",
             "metadata": {
                 "description": "ResourceGroup Ip Address."
             }
         },
-        //Gateway facing the public network
-        "RgNatGateway": { 
-            "type": "string",
-            "defaultValue": "NatGateWay",
-            "metadata": { 
-                "description": "Nat Gateway for public network access"
-            }
-        },
-        //Setting the location of the Rg to East US
-        "location" : { 
+
+        "location" : {
             "defaultValue": "EastUS",
-            "type": "string", 
-            "metadata": { 
+            "type": "string",
+            "metadata": {
                 "decription": "Location Of The Resource Group"
             }
         }
-
     },
     "functions": [],
     "variables": {
-        "publicIPName": "[concat(parameters('RgNatGateway'), 'ip')]", 
-        "publicIPAddress": [ 
+        "publicIPName": "[concat(parameters('RgNatGateway'), 'ip')]",
+        "publicIPAddress": [
             {
                 "id": "[resourceId('Microsoft.Network/publicIPAddress', variables('publicIPName'))]"
             }
         ]
     },
 
-    "resources": [ 
+    "resources": [
         {
 
-            // "type": "Microsoft.Resource/resourceGroups",
-            // "apiVersion": "2018-05-01",
-            // "location": "[parameters('location')]",
-            // "name": "[parameters('ResourceGroupName')]",
-            // "properties": {}
-
-            "type": "Microsoft.Network/virtualNetworks", 
+            "type": "Microsoft.Network/publicIPAddress",
             "apiVersion": "2020-05-01",
             "name": "[variables('publicIPAddress')]",
-            "location": "[parameters('location')]", 
-            "sku": { 
-                "name": "Standard"
-            },
-
-            "properties": { 
-                "publicIPAddressVersion": "IPv4", 
-                "publicIPAllocation": "Dynamic",
-                "idleTimeOutInMinutes": 4,
-                "dnsSetting": { 
-                    "domainNameLabel": "[parameters('PubIpDNS')]"
-                }
-            }
-        }, 
-        {
-            "type": "Microsoft.Resource/resourceGroups",
-            "apiVersion": "2018-05-01",
             "location": "[parameters('location')]",
-            "name": "[parameters('ResourceGroupName')]",
-            "properties": {}
-        }, 
-        {
-            "type": "Microsoft.Network/natGateways",
-            "apiVersion": "2019-02-01",
-            "name": "[parameters('RgNatGateway')]",
-            "location": "[parameters('location')]",
-            "dependsOn": [ 
-                "[resourceId('Microsoft.Network/publicIPAddress', variables('publicIPName'))]"
-            ], 
             "sku": {
                 "name": "Standard"
             },
-            
+
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocation": "Dynamic",
+                "idleTimeOutInMinutes": 4,
+                "dnsSetting": {
+                    "domainNameLabel": "[parameters('PubIpDNS')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/natGateways",
+            "apiVersion": "2019-11-01",
+            "name": "[parameters('RgNatGateway')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddress', variables('publicIPName'))]"
+            ],
+            "sku": {
+                "name": "Standard"
+            },
+
              "properties": {
                  "idleTimeoutInMinutes": 4,
                  "publicIpAddresses": "[if(not(empty(parameters('PubIpDNS'))), variables('publicIPAddress'), json('null'))]"
-            } 
-        }, 
+            }
+        },
             {
-                "type" : "Microsoft.Network/virtualNetwork", 
+                "type" : "Microsoft.Network/virtualNetwork",
                 "apiVersion": "2019-11-01",
                 "name": "[parameters('location')]",
-                "dependsOn": [ 
+                "dependsOn": [
                     "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
-                ], 
-                "properties": { 
-                    "addressSpace": { 
-                        "addressPrefix": [ 
+                ],
+                "properties": {
+                    "addressSpace": {
+                        "addressPrefix": [
                             "[parameters('VnetAddressPrefix')]"
                         ]
                     },
-                    "subnet": [ 
+                    "subnet": [
                         {
-                            "name": "[parameters('RgSubNet')]", 
-                            "properties": { 
+                            "name": "[parameters('RgSubNet')]",
+                            "properties": {
                                 "addressPrefix": "[parameters('RgSubNetAddressPrefix')]",
-                                "NatGateway": { 
+                                "NatGateway": {
                                     "id": "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
                                 },
                                 "privateEndpointNetworkPolicies": "Enable",
                                 "privateLinkServiceNetworkPolicies": "Enable"
                             }
                         }
-                    ], 
+                    ],
                     "enableDdosProtection": false,
                     "enableVMProtection": false
                 }
@@ -174,16 +141,16 @@
             {
                 "type": "Microsoft.Network/virtualNetworks/subnets",
                 "apiVersion": "2019-11-01",
-                "name": "[concat(parameters('RgVNet'), '/Vnet')]",
-                "dependsOn": [ 
-                    "[resourceId('Microsoft.Network/virtualNetwork', parameters('RgVNet'))]", 
+                "name": "[concat(parameters('RgVNet'), '/SubVnet')]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Network/virtualNetwork', parameters('RgVNet'))]",
                     "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
                 ],
-                "properties": { 
-                    "addressPrefix": "[parameters('VnetAddressPrefix')]", 
+                "properties": {
+                    "addressPrefix": "[parameters('VnetAddressPrefix')]",
                     "natGateway": {
                         "id": "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
-                    }, 
+                    },
                     "privateEndpointNetworkPolicies": "Enabled",
                     "privateLinkServiceNetworkPolicies": "Enables"
                 }
