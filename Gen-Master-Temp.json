@@ -134,9 +134,55 @@
              "properties": {
                  "idleTimeoutInMinutes": 4,
                  "publicIpAddresses": "[if(not(empty(parameters('PubIpDNS'))), variables('publicIPAddress'), json('null'))]"
-        } 
-    }
-
+            } 
+        }, 
+            {
+                "type" : "Microsoft.Network/virtualNetwork", 
+                "apiVersion": "2019-11-01",
+                "name": "[parameters('location')]",
+                "dependsOn": [ 
+                    "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
+                ], 
+                "properties": { 
+                    "addressSpace": { 
+                        "addressPrefix": [ 
+                            "[parameters('VnetAddressPrefix')]"
+                        ]
+                    },
+                    "subnet": [ 
+                        {
+                            "name": "[parameters('RgSubNet')]", 
+                            "properties": { 
+                                "addressPrefix": "[parameters('RgSubNetAddressPrefix')]",
+                                "NatGateway": { 
+                                    "id": "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
+                                },
+                                "privateEndpointNetworkPolicies": "Enable",
+                                "privateLinkServiceNetworkPolicies": "Enable"
+                            }
+                        }
+                    ], 
+                    "enableDdosProtection": false,
+                    "enableVMProtection": false
+                }
+            },
+            {
+                "type": "Microsoft.Network/virtualNetworks/subnets",
+                "apiVersion": "2019-11-01",
+                "name": "[concat(parameters('RgVNet'), '/Vnet')]",
+                "dependsOn": [ 
+                    "[resourceId('Microsoft.Network/virtualNetwork', parameters('RgVNet'))]", 
+                    "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
+                ],
+                "properties": { 
+                    "addressPrefix": "[parameters('VnetAddressPrefix')]", 
+                    "natGateway": {
+                        "id": "[resourceId('Microsoft.Network/natGateways', parameters('RgNatGateway'))]"
+                    }, 
+                    "privateEndpointNetworkPolicies": "Enabled",
+                    "privateLinkServiceNetworkPolicies": "Enables"
+                }
+            }
     ],
     "outputs": {}
 }
