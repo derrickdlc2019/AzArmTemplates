@@ -10,7 +10,7 @@
       }
     },
     "subnetname": {
-      "defaultValue": "mySubnet",
+      "defaultValue": "Subnet",
       "type": "String",
       "metadata": {
         "description": "Name of the subnet for virtual network"
@@ -128,7 +128,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks/subnets",
       "apiVersion": "2019-11-01",
-      "name": "[concat(parameters('vnetname'), '/mySubnet')]",
+      "name": "[concat(parameters('vnetname'), '/Subnet')]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetname'))]",
         "[resourceId('Microsoft.Network/natGateways', parameters('natgatewayname'))]"
